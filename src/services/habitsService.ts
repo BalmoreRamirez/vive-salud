@@ -1,6 +1,6 @@
 import { HABITS } from '@/constants/habits';
 import { hasSupabaseConfig, supabase } from '@/config/supabase';
-import { HabitKey, HabitLog, HabitSummary } from '@/types/habit';
+import { Habit, HabitKey, HabitLog, HabitSummary } from '@/types/habit';
 
 export interface WeeklyProgressPoint {
   date: string;
@@ -172,6 +172,33 @@ function seedMockLogs(): HabitLog[] {
 
 let mockLogsData: HabitLog[] = seedMockLogs();
 
+function isHabitKey(value: string): value is HabitKey {
+  return HABITS.some((habit) => habit.id === value);
+}
+
+function mapHabitRowToHabit(row: Record<string, unknown>): Habit | null {
+  const rawId = String(row.id ?? '');
+  if (!isHabitKey(rawId)) {
+    return null;
+  }
+
+  const fallback = HABITS.find((habit) => habit.id === rawId);
+  if (!fallback) return null;
+
+  const rawGoal = Number(
+    row.recommended_daily_goal ?? row.recommendedDailyGoal ?? row.goal ?? fallback.recommendedDailyGoal,
+  );
+
+  return {
+    id: rawId,
+    name: String(row.name ?? fallback.name),
+    icon: String(row.icon ?? fallback.icon),
+    goalLabel: String(row.goal_label ?? row.goalLabel ?? fallback.goalLabel),
+    unit: String(row.unit ?? fallback.unit),
+    recommendedDailyGoal: Number.isFinite(rawGoal) ? rawGoal : fallback.recommendedDailyGoal,
+  };
+}
+
 async function getLogsFromSupabase(userId: string, fromDate: string): Promise<HabitLog[] | undefined> {
   if (!supabase) return undefined;
 
@@ -192,6 +219,26 @@ async function getLogsFromSupabase(userId: string, fromDate: string): Promise<Ha
     value: row.value,
     date: row.date,
   }));
+}
+
+export async function getHabitsCatalog(): Promise<Habit[]> {
+  if (!hasSupabaseConfig || !supabase) {
+    return HABITS;
+  }
+
+  const { data, error } = await supabase
+    .from('habits')
+    .select('*');
+
+  if (error || !data) {
+    return HABITS;
+  }
+
+  const mapped = (data as Record<string, unknown>[])
+    .map((row) => mapHabitRowToHabit(row))
+    .filter((habit): habit is Habit => habit !== null);
+
+  return mapped.length ? mapped : HABITS;
 }
 
 export async function getDailySummary(userId?: string): Promise<HabitSummary[]> {

@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Animated, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HABITS } from '@/constants/habits';
 import { HabitCard } from '@/components/HabitCard';
 import { RegisterProgressModal } from '@/components/RegisterProgressModal';
 import { RootStackParamList } from '@/navigation/types';
@@ -17,6 +16,7 @@ export function DashboardScreen() {
   const { userName } = useAuthStore();
   const {
     loading,
+    habits,
     summary,
     currentStreak,
     loadSummary,
@@ -106,7 +106,7 @@ export function DashboardScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={HABITS}
+        data={habits}
         keyExtractor={(habit) => habit.id}
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={loadSummary} />}
@@ -123,7 +123,7 @@ export function DashboardScreen() {
 
               <View style={styles.kpiCard}>
                 <Text style={styles.kpiLabel}>Hábitos completados</Text>
-                <Text style={styles.kpiValue}>{completedToday} / {HABITS.length}</Text>
+                <Text style={styles.kpiValue}>{completedToday} / {habits.length}</Text>
               </View>
             </View>
 

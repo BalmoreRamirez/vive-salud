@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Animated, FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { HABITS, DAILY_TIPS } from '@/constants/habits';
+import { DAILY_TIPS } from '@/constants/habits';
 import { getHabitRegisterOptions, requiresCustomInput } from '@/constants/habitRegistration';
 import { getSpiritualVerseOfDay } from '@/constants/spiritualVerses';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -14,6 +14,7 @@ export function HabitDetailScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'HabitDetail'>>();
   const { habitId } = route.params;
   const {
+    habits,
     summary,
     logsByHabit,
     loadHabitLogs,
@@ -25,7 +26,7 @@ export function HabitDetailScreen() {
   const [customValue, setCustomValue] = useState('');
   const [sharedToday, setSharedToday] = useState(false);
 
-  const habit = useMemo(() => HABITS.find((item) => item.id === habitId), [habitId]);
+  const habit = useMemo(() => habits.find((item) => item.id === habitId), [habitId, habits]);
   const habitSummary = summary.find((item) => item.habitId === habitId);
 
   useEffect(() => {

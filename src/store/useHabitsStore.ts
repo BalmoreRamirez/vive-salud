@@ -3,13 +3,14 @@ import {
   addHabitLog,
   getCurrentStreak,
   getDailySummary,
+  getHabitsCatalog,
   getHistoricalBestStreak,
   getHabitLogs,
   getWeeklyCompletedHabits,
   getWeeklyProgress,
   WeeklyProgressPoint,
 } from '@/services/habitsService';
-import { HabitLog, HabitSummary } from '@/types/habit';
+import { Habit, HabitLog, HabitSummary } from '@/types/habit';
 import { create } from 'zustand';
 
 interface HabitsState {
@@ -19,6 +20,7 @@ interface HabitsState {
   historicalBestStreak: number;
   weeklyCompletedHabits: number;
   weeklyProgress: WeeklyProgressPoint[];
+  habits: Habit[];
   summary: HabitSummary[];
   logsByHabit: Record<string, HabitLog[]>;
   setUserId: (userId?: string) => void;
@@ -34,6 +36,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
   historicalBestStreak: 0,
   weeklyCompletedHabits: 0,
   weeklyProgress: [],
+  habits: HABITS,
   summary: HABITS.map((habit) => ({
     habitId: habit.id,
     currentValue: 0,
@@ -44,7 +47,8 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
   setUserId: (userId) => set({ userId }),
   loadSummary: async () => {
     set({ loading: true });
-    const [result, streak, historicalBestStreak, weeklyCount, weeklyProgress] = await Promise.all([
+    const [habits, result, streak, historicalBestStreak, weeklyCount, weeklyProgress] = await Promise.all([
+      getHabitsCatalog(),
       getDailySummary(get().userId),
       getCurrentStreak(get().userId),
       getHistoricalBestStreak(get().userId),
@@ -53,6 +57,7 @@ export const useHabitsStore = create<HabitsState>((set, get) => ({
     ]);
 
     set({
+      habits,
       summary: result,
       currentStreak: streak,
       historicalBestStreak,

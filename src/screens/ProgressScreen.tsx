@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, FlatList, StyleSheet, Text, View } from 'react-native';
-import { HABITS } from '@/constants/habits';
 import { useHabitsStore } from '@/store/useHabitsStore';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -53,6 +52,7 @@ function AnimatedWeeklyBar({ ratio, label }: { ratio: number; label: string }) {
 export function ProgressScreen() {
   const {
     summary,
+    habits,
     currentStreak,
     historicalBestStreak,
     weeklyCompletedHabits,
@@ -77,7 +77,7 @@ export function ProgressScreen() {
 
   return (
     <FlatList
-      data={HABITS}
+      data={habits}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.container}
       ListHeaderComponent={
@@ -92,7 +92,7 @@ export function ProgressScreen() {
             </View>
             <View style={styles.kpiCard}>
               <Text style={styles.kpiLabel}>Completados semana</Text>
-              <Text style={styles.kpiValue}>{weeklyCompletedHabits}/8</Text>
+              <Text style={styles.kpiValue}>{weeklyCompletedHabits}/{habits.length}</Text>
             </View>
           </View>
 
@@ -126,7 +126,7 @@ export function ProgressScreen() {
               <Text style={[styles.summaryHeaderText, styles.colGoal]}>Meta</Text>
               <Text style={[styles.summaryHeaderText, styles.colUnit]}>Unidad</Text>
             </View>
-            {HABITS.map((habit) => (
+            {habits.map((habit) => (
               <View key={habit.id} style={styles.summaryRow}>
                 <Text style={[styles.summaryCell, styles.colHabit]}>{habit.name}</Text>
                 <Text style={[styles.summaryCell, styles.colGoal]}>{habit.recommendedDailyGoal}</Text>
